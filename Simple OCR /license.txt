@@ -1,0 +1,9 @@
+Machine Learning OCR Tool
+===================================
+
+
+AForge.NET
+----------
+
+AForge.NET Framework is published under LGPL v3 license.
+
