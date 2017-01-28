@@ -1,0 +1,48 @@
+    After OpenCV 3 installed in this envirnoment, this par, I will summarize the steps to install the software of Deep Learning, aka Caffe.
+
+    Download the Caffe source code  from github
+    * Caffe Download
+    Install the requirement library by using apt-get to match the compile requirements:
+    $ sudo apt-get install linux-headers-`uname -a`
+    $ sudo apt-get install libprotobuf-dev libleveldb-dev \
+    libsnappy-dev libopencv-dev libhdf5-serial-dev \
+    protobuf-compiler
+    $ sudo apt-get install –no-install-recommends libboost-all-dev
+    $ sudo apt-get install libgflags-dev libgoogle-glog-dev liblmdb-dev\
+    libatlas-base-dev libopenblas-base libopenblas-dev python-pip
+    [GPU] If we want to use GPU technology to accelerate the deep learning, we need to use NVIDIA’s cuDNN library. If not, please skip this step and jump to Step 6.
+    * cuDNN Download
+    [GPU] Extract the cuDNN package which you downloaded. Then copy the related files into your system directories:
+    $ sudo cp -a <cuDNN-extract-path>/include/* /usr/include/
+    $ sudo cp -a <cuDNN-extract-path>/lib64/* /usr/local/cuda/lib64
+    $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64
+    [GPU] For compile the Caffe with GPU support, please also install the boost library
+    $ sudo apt-get install libboost-all-dev
+    Change the working directory to <path-caffe-src>/
+    Create a Makefile.config from Makefile.config.example under <path-caffe-src>/ folder.
+    $ sudo cp <path-caffe-src>/Makefile.config.example <path-caffe-src>/Makefile.config
+    Modiy the Makefile.config to match your system:
+        [GPU]If you are going to using GPU, please UNCOMMENT he USE_CUDNN := 1
+        [CPU]If you are going to use CPU, please UNCOMMENT the CPU_ONLY := 1
+        UNCOMMENT and change the value for OPENCV option to OPENCV_VERSION := 3
+        If you are use CPU and want Caffe to support multiple CPU core parallarism, please change the BLAS := open.
+        PS: use BLAS:=atlas, Caffe will only use only CPU for computing
+        [Ubuntu 15.04] Modify the “INCLUDE_DIRS” and append a “/usr/include/hdf5/serial/” at the end of this line.
+    [CPU]If you are going to compile the Caffe with openBLAS and support multiple CPU core parallarism, please use the below command to set a environment variable.
+    $ echo “export OPENBLAS_NUM_THREADS=`cat /proc/cpuinfo | grep -i processor | wc -l`”
+    [Ubuntu 15.04] Change the working directory to /usr/lib/x86_64-linux-gnu/, and make 2 symbol links to the related hdf5 library:
+    $ sudo ln -s libhdf5_serial.so.8.0.2 libhdf5.so
+    $ sudo ln -s libhdf5_serial_hl.so.8.0.2 libhdf5_hl.so
+    PS: Due to Ubuntu 15.04 and higher, the libhdf5 installation location and names are differnt than before. To make sure the Caffe source code could find these library/head file, thess changes are necessary. 
+    Change directory to <path-caffe-src>/python and run below command to install all necessary python components, when building caffe modules for python interface:
+    $ for req in $(cat ./requirements.txt); do pip install $req; done
+    PS: If you don’t have pip installed, please install it by using “sudo apt-get install pip”
+    Add the python module to your environemt or add it in your .bashrc
+    $ export PYTHONPATH=$PYTHONPATH:<path-caffe-path>/python/
+    Now changing the working folder to <path-caffe-path> and make the source code:
+    $ make all -j `cat /proc/cpuinfo | grep -i processor | wc -l`
+    $ make test -j `cat /proc/cpuinfo | grep -i processor | wc -l`
+    $ make runtest -j `cat /proc/cpuinfo | grep -i process | wc -l`
+    After the Caffe build successfully, you can make a distribution folder which contains every compiled binary file. This folder could be distrubuted and deployed to other system:
+    $ make distribute
+    You can find all of binary files under <path-caffe-src>/distribute
